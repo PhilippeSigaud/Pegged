@@ -113,7 +113,7 @@ unittest
         A <- Parameterized.LineComment
     "));
 
-    ParseTree p5 = ParamTest5("// This is a comment!
+    auto p5 = ParamTest5("// This is a comment!
     This is not a comment.
     End.");
     assert(p5.successful);

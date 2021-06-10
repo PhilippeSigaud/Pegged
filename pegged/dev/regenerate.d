@@ -5,7 +5,7 @@ module pegged.dev.regenerate;
 
 import pegged.grammar;
 import pegged.examples.peggedgrammar;
-import pegged.examples.testergrammar;
+//import pegged.examples.testergrammar;
 
 void main()
 {

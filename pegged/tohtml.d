@@ -4,6 +4,7 @@ import std.stdio;
 import std.conv, std.string;
 import std.algorithm.searching;
 import pegged.peg;
+import pegged.parsetree : isParseTree;
 
 enum Expand
 {
@@ -21,8 +22,8 @@ enum Expand
  *      p = The ParseTree to represent.
  *      file = The file where to write the tree.
  */
-void toHTML(Expand e = Expand.no, Details...)(const ref ParseTree p,
-    File file)
+void toHTML(ParseTree, Expand e = Expand.no, Details...)(const ref ParseTree p,
+    File file) if (isParseTree!ParseTree)
 {
     file.write(`
 <!DOCTYPE html>
@@ -163,10 +164,10 @@ details.leaf summary::-webkit-details-marker {
  *      p = The ParseTree to represent.
  *      filename = The name of file where tree is written.
  */
-void toHTML(Expand e = Expand.no, Details...)(const ref ParseTree p,
-    string filename)
+void toHTML(ParseTree, Expand e = Expand.no, Details...)(const ref ParseTree p,
+    string filename) if(isParseTree!ParseTree)
 {
     if (filename.endsWith(".html", ".htm") == 0)
         filename ~= ".html";
-    toHTML!(e, Details)(p, File(filename, "w"));
+    toHTML!(ParseTree, e, Details)(p, File(filename, "w"));
 }

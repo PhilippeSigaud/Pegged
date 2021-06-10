@@ -7,7 +7,7 @@ module pegged.examples.simple_arithmetic;
 import std.conv: to;
 
 import pegged.grammar;
-
+import pegged.defaultparsetree : ParseTree = DefaultParseTree;
 mixin(grammar(`
 Arithmetic:
     Term     < Factor (Add / Sub)*

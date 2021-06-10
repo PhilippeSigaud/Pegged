@@ -40,7 +40,7 @@ enum InfiniteLoop { no, yes, indeterminate }
 /**
 Struct holding the introspection info on a rule.
 */
-struct RuleInfo
+@safe struct RuleInfo
 {
     Recursive recursion; /// Is the rule recursive?
     LeftRecursive leftRecursion; /// Is the rule left-recursive?
@@ -52,13 +52,13 @@ struct RuleInfo
 /**
 Struct holding the introspection info on a grammar.
 */
-struct GrammarInfo
+@safe struct GrammarInfo
 {
     RuleInfo[string] ruleInfo;
     immutable(string[])[] leftRecursiveCycles;
 }
 
-pure void appendCycleIfUnique(ref immutable(string[])[] cycles, const string[] cycle)
+@safe pure void appendCycleIfUnique(ref immutable(string[])[] cycles, const string[] cycle)
 {
     bool exists()
     {
@@ -89,7 +89,7 @@ Returns for all grammar rules:
 
 This kind of potential problem can be detected statically and should be transmitted to the grammar designer.
 */
-pure GrammarInfo grammarInfo(ParseTree p)
+GrammarInfo grammarInfo(ParseTree)(ParseTree p) pure @safe
 {
     if (p.name == "Pegged")
         return grammarInfo(p.children[0]);
@@ -109,18 +109,18 @@ pure GrammarInfo grammarInfo(ParseTree p)
     also appear in the call graph when the rule has a name: hence, calls to predefined rules like 'identifier' or
     'digit' will appear, but not a call to '[0-9]+', considered here as an anonymous rule.
     */
-    bool[string][string] callGraph(ParseTree p)
+    bool[string][string] callGraph(ParseTree p) @safe
     {
-        bool[string] findIdentifiers(ParseTree p)
+        bool[string] findIdentifiers(ParseTree p) @trusted
         {
             bool[string] idList;
             if (p.name == "Pegged.Identifier")
                 idList[p.matches[0]] = true;
-            else
+            else {
                 foreach(child; p.children)
                     foreach(name; findIdentifiers(child).keys)
                         idList[name] = true;
-
+            }
             return idList;
         }
 
@@ -144,7 +144,7 @@ pure GrammarInfo grammarInfo(ParseTree p)
     It will propagate the calls to find all rules called by a given rule,
     directly (already in the call graph) or indirectly (through another rule).
     */
-    bool[string][string] closure(bool[string][string] graph)
+    bool[string][string] closure(bool[string][string] graph) @trusted
     {
         bool[string][string] path;
         foreach(rule, children; graph) // deep-dupping, to avoid children aliasing
@@ -169,7 +169,7 @@ pure GrammarInfo grammarInfo(ParseTree p)
         return path;
     }
 
-    Recursive[string] recursions(bool[string][string] graph)
+    Recursive[string] recursions(bool[string][string] graph) @safe
     {
         bool[string][string] path = closure(graph);
 
@@ -189,7 +189,7 @@ pure GrammarInfo grammarInfo(ParseTree p)
         return result;
     }
 
-    NullMatch nullMatching(ParseTree p)
+    NullMatch nullMatching(ParseTree p) @safe
     {
         switch (p.name)
         {
@@ -428,18 +428,18 @@ Returns for all grammar rules:
 
 This kind of potential problem can be detected statically and should be transmitted to the grammar designer.
 */
-pure RuleInfo[string] ruleInfo(ParseTree p)
+@safe pure RuleInfo[string] ruleInfo(ParseTree)(ParseTree p)
 {
     return grammarInfo(p).ruleInfo;
 }
 
 /** ditto */
-RuleInfo[string] ruleInfo(string grammar)
+@safe RuleInfo[string] ruleInfo(string grammar)
 {
     return ruleInfo(Pegged(grammar).children[0]);
 }
 
-unittest
+@safe unittest
 {
     auto info = ruleInfo(`
         Test:
@@ -463,7 +463,7 @@ unittest
 }
 
 // Test against infinite recursion in detection of indirect left-recursion.
-unittest
+@safe unittest
 {
     auto info = ruleInfo(`
         Test:
@@ -475,7 +475,7 @@ unittest
 }
 
 // Test against compile-time infinite recursion.
-unittest // Mutual left-recursion
+@safe unittest // Mutual left-recursion
 {
     enum ct = ruleInfo(`
       Left:
@@ -498,7 +498,7 @@ unittest // Mutual left-recursion
     assert(rt["P"].leftRecursion == LeftRecursive.direct);
 }
 
-unittest // Intersecting cycles of left-recursion
+@safe unittest // Intersecting cycles of left-recursion
 {
     enum ct = ruleInfo(`
       Left:
@@ -520,7 +520,7 @@ unittest // Intersecting cycles of left-recursion
     assert(rt["B"].leftRecursion == LeftRecursive.indirect);
 }
 
-unittest // Null-matching
+@safe unittest // Null-matching
 {
     enum ct = ruleInfo(`
       NM:
@@ -538,7 +538,7 @@ unittest // Null-matching
     assert(rt["NMM"].nullMatch == NullMatch.yes);
 }
 
-unittest // Not null-matching
+@safe unittest // Not null-matching
 {
     enum ct = ruleInfo(`
       Left:
@@ -560,7 +560,7 @@ unittest // Not null-matching
     assert(rt["P"].nullMatch == NullMatch.no);
 }
 
-unittest // Left-recursive null-matching
+@safe unittest // Left-recursive null-matching
 {
     enum ct = ruleInfo(`
       Left:
@@ -587,7 +587,7 @@ unittest // Left-recursive null-matching
 Act on rules parse tree as produced by pegged.parser.
 Replace every occurence of child in parent by child's parse tree
 */
-ParseTree replaceInto(ParseTree parent, ParseTree child)
+ParseTree replaceInto(ParseTree)(ParseTree parent, ParseTree child)
 {
     if (parent.name == "Pegged.RhsName" && parent.matches[0] == child.matches[0])
         return ParseTree("Pegged.Named", true, child.matches[0..1], "",0,0,

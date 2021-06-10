@@ -8,6 +8,8 @@
         "pegged/peg.d",
         "pegged/grammar.d",
         "pegged/parser.d",
+        "pegged/parsetree.d",
+        "pegged/defaultparsetree.d",
         "pegged/introspection.d",
         "pegged/tohtml.d",
         "pegged/dynamic/grammar.d",

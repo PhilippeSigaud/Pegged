@@ -45,3 +45,12 @@ build/*
 
 .vscode/
 
+# Emacs
+*#
+*.parked
+
+# Pegged self generator
+pegged/dev/peggedgrammar
+
+# Test .done
+.done

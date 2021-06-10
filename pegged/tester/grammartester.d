@@ -15,7 +15,7 @@ import std.string : stripRight, stripLeft, lineSplitter;
 import pegged.tester.testerparser;
 import pegged.grammar;
 
-class GrammarTester(grammar, string startSymbol)
+@safe class GrammarTester(grammar, string startSymbol)
 {
 	bool soft = false;
 
@@ -111,7 +111,7 @@ class GrammarTester(grammar, string startSymbol)
 		return runTest(file, lineNo, textToParse, desiredTreeRepresentation, true);
 	}
 
-	static auto getDifferencer(T,P)( auto ref T treeRoot, auto ref P patternRoot )
+	static auto getDifferencer(T,P)( auto ref T treeRoot, auto ref P patternRoot ) @trusted
 	{
 		Differencer!(T,P) t;
 		t.treeRoot = &treeRoot;
@@ -120,7 +120,7 @@ class GrammarTester(grammar, string startSymbol)
 	}
 }
 
-private struct Differencer(T,P)
+@safe private struct Differencer(T,P)
 {
 	size_t level = 0;
 	size_t differences = 0;
@@ -161,7 +161,7 @@ private struct Differencer(T,P)
 		return diffText.data;
 	}
 
-	private void diffNode( const(T*) node, const(P*) pattern )
+	private void diffNode( const(T*) node, const(P*) pattern ) @trusted
 	{
 		assert(pattern);
 		switch ( pattern.name )
@@ -221,7 +221,7 @@ private struct Differencer(T,P)
 		}
 	}
 
-	private void traverseUnexpected( const(T*) node )
+	private void traverseUnexpected( const(T*) node ) @trusted
 	{
 		assert(node);
 		lineDiff(node, null);
@@ -231,7 +231,7 @@ private struct Differencer(T,P)
 		level--;
 	}
 
-	private void diffBranch( const(T*) node, const(P*) pattern, bool[] visited, ref size_t cursor )
+	private void diffBranch( const(T*) node, const(P*) pattern, bool[] visited, ref size_t cursor ) @trusted
 	{
 		assert(pattern);
 		switch ( pattern.name )
@@ -386,7 +386,7 @@ private struct Differencer(T,P)
 	}
 }
 
-unittest
+@safe unittest
 {
 	string normalizeStr(string str)
 	{
@@ -575,7 +575,7 @@ TesterGrammar.Root                   =  Root
 	assert(tester.errorText.length > 0);
 }
 
-unittest
+@safe unittest
 {
     mixin(grammar(`
     Arithmetic:
@@ -628,5 +628,3 @@ unittest
 /+ For reference:
 
 +/
-
-

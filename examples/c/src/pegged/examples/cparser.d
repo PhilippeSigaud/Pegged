@@ -2,7 +2,7 @@ module pegged.examples.cparser;
 
 import pegged.grammar;
 
-struct C
+@safe struct C
 {
     enum names = [`TranslationUnit`:true, `ExternalDeclaration`:true, `FunctionDefinition`:true, `PrimaryExpression`:true,
     `PostfixExpression`:true, `ArgumentExpressionList`:true, `UnaryExpression`:true, `IncrementExpression`:true, `PlusPlus`:true,
@@ -21,7 +21,9 @@ struct C
     `Keyword`:true, `Spacing`:true, `Comment`:true, `StringLiteral`:true, `DQChar`:true, `EscapeSequence`:true, `CharLiteral`:true, `IntegerLiteral`:true,
     `Integer`:true, `IntegerSuffix`:true, `FloatLiteral`:true, `Sign`:true];
 
-    mixin decimateTree;
+    import pegged.defaultparsetree : ParseTree = DefaultParseTree;
+    mixin decimateTree!ParseTree;
+    mixin DefaultPatters!ParseTree;
 
     static ParseTree TranslationUnit(ParseTree p)
     {

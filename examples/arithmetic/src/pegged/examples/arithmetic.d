@@ -7,6 +7,7 @@ module pegged.examples.arithmetic;
 import std.conv: to;
 
 import pegged.grammar;
+import pegged.defaultparsetree : ParseTree = DefaultParseTree;
 
 mixin(grammar(`
 # Arithmetic grammar with variable terminal
